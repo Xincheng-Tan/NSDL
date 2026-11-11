@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+checkpoints/
+data/
+outputs/
+results/**/*.jsonl
+logs/
+wandb/
+*.pt
+*.pth
+*.safetensors
+*.parquet
+.env
+api_keys.json

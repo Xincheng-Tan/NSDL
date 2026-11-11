@@ -1,0 +1,200 @@
+{
+ "data_source": "locus_bench",
+ "prompt": [
+  {
+   "content": "You are a plan creator. I will provide you with an image of robots in a scene, available robots and their action primitives, and a task description. You need to create a plan to complete the task.\nYou must first analyze the image to fully understand the scene depicted. Then, analyze the task description. Finally, create a plan to complete the task.\nYour reasoning must strictly adhere to the visual content of the image and the task description—no assumptions, hypotheses, or guesses are allowed.\n1. Create a plan to complete the task, noting:\n   - Each robot can only perform ONE action per time step.\n   - Multiple robots can work in parallel, but each robot is limited to one action at a time.\n2. You need to first provide your reasoning process within <think> and </think> tags.\n3. Your final answer must be within <answer> and </answer> tags, and **strictly follow the JSON format specified below**.\n\nOutput Format Requirements(please comply strictly, do not output any additional content):\n<answer>\n  [\n    {\n      \"step\": 1,\n      \"actions\": {'R1': ['Move', 'banana'], 'R2': ['Move', 'apple']}\n    },\n    {\n      \"step\": 2,\n      \"actions\": {'R1': ['Reach', 'banana'], 'R2': ['Reach', 'apple']}\n    }\n    # ... subsequent steps ...\n  ]\n</answer>\nWhere:\n- step is the time step number (starting from 1, incrementing sequentially).\n- Each robot can only have ONE action per time step.\n- \"actions\" is a dictionary that specifies the action for each robot during a single time step. Each key (e.g., \"R1\", \"R2\") represents a robot. Each value is a list describing the single action that robot will perform in this step, with the following format: action_type, target_object_or_location, (optional: extra_argument)\nAction primitives and descriptions: {'Move': \"Command ['Move', 'object']: Robot R moves to the specified object.\", 'Open': \"Command ['Open', 'object']: Open the object held by the Robot R's end effector.\", 'Close': \"Command ['Close', 'object']: Close the object held by the Robot R's end effector.\", 'Reach': \"Command ['Reach', 'object']: Robot R reaches the specified object.\", 'Grasp': \"Command ['Grasp', 'object']: Robot R's end effector performs a grasping operation on a specified object.\", 'Place': \"Command ['Place', 'object']: Place the object held by the Robot R's end effector at a specified location (the release point, not the object itself).\", 'Push': \"Command ['Push', 'object', 'R1']: Robot R pushes the object to robot R1.\", 'Interact': \"Command ['Interact', 'object']: A general interaction operation, flexible for representing interactions with any asset.\"}\nAvailable robot set: {'R1': 'unitree_h1'}\nRobot characteristics: {'unitree_h1': 'A humanoid robot with arms and legs designed for human-like movements and tasks. Color: Black.'}\nTheir available operation APIs: {'unitree_h1': ['Move', 'Reach', 'Grasp', 'Place', 'Open', 'Close', 'Interact']}\n",
+   "role": "system"
+  },
+  {
+   "content": "<image>Every fruit in this kitchen belongs on the table. Bring over any that are elsewhere.",
+   "role": "user"
+  }
+ ],
+ "ability": "Task Planning",
+ "reward_model": {
+  "ground_truth": {
+   "description": "Every fruit in this kitchen belongs on the table. Bring over any that are elsewhere.",
+   "goal_constraints": [
+    [
+     {
+      "is_satisfied": true,
+      "name": "pear",
+      "status": {
+       "pos.name": "table"
+      },
+      "type": "asset"
+     }
+    ],
+    [
+     {
+      "is_satisfied": true,
+      "name": "peach",
+      "status": {
+       "pos.name": "table"
+      },
+      "type": "asset"
+     }
+    ],
+    [
+     {
+      "is_satisfied": true,
+      "name": "tomato",
+      "status": {
+       "pos.name": "table"
+      },
+      "type": "asset"
+     }
+    ]
+   ],
+   "idle_robots": [
+    "anymal_c",
+    "panda"
+   ],
+   "init_pos": {
+    "peach_1": [
+     "table"
+    ],
+    "pear_0": [
+     "kitchen work area"
+    ],
+    "rock_4": [
+     "table"
+    ],
+    "scissors_3": [
+     "kitchen work area"
+    ],
+    "tomato_2": [
+     "table"
+    ]
+   },
+   "layout_id": 3,
+   "locus_meta": {
+    "base_mechanical_signature": {
+     "base_open": false,
+     "m_level": 0,
+     "n_robots": 1,
+     "topology": "single_quantified_fetch"
+    },
+    "bench_family": "F3",
+    "bridge_kind": null,
+    "bridge_variant": null,
+    "cell": [
+     3,
+     0
+    ],
+    "counterfactual_pair_id": null,
+    "device_variant": null,
+    "distractors": [
+     {
+      "kind": "clutter",
+      "name": "rock",
+      "pos": "table"
+     }
+    ],
+    "empty_plan": false,
+    "fixture_layout_masks": [],
+    "instantiate_seed": 2742421687,
+    "layout_holdout": false,
+    "layout_restricted": false,
+    "mask_map": {
+     "mask1": "pear",
+     "mask2": "peach",
+     "mask3": "tomato",
+     "mask4": "scissors",
+     "mask5": "table"
+    },
+    "n_paraphrases": 6,
+    "n_realizations": 8,
+    "observation_tool": {
+     "args": {
+      "query": {
+       "tag": "fruit"
+      }
+     },
+     "name": "detect"
+    },
+    "opaque_container": false,
+    "paraphrase_holdout": false,
+    "paraphrase_id": 3,
+    "phi_code": null,
+    "phi_ok": true,
+    "sample_index": 1,
+    "split": "ood_s",
+    "state_entailed_open": false,
+    "state_realization": {
+     "mask1": "absent",
+     "mask2": "present",
+     "mask3": "present"
+    },
+    "style_idx": 4,
+    "style_seed": 7432919520265815303
+   },
+   "robots": {
+    "R1": "unitree_h1",
+    "R2": null,
+    "R3": null
+   },
+   "task_id": "F3_s3m0",
+   "task_name": "F3_s3m0",
+   "temporal_constraints": [],
+   "time_steps": [
+    {
+     "actions": {
+      "R1": [
+       "Move",
+       "pear"
+      ],
+      "R2": null,
+      "R3": null
+     },
+     "step": 1
+    },
+    {
+     "actions": {
+      "R1": [
+       "Reach",
+       "pear"
+      ],
+      "R2": null,
+      "R3": null
+     },
+     "step": 2
+    },
+    {
+     "actions": {
+      "R1": [
+       "Grasp",
+       "pear"
+      ],
+      "R2": null,
+      "R3": null
+     },
+     "step": 3
+    },
+    {
+     "actions": {
+      "R1": [
+       "Move",
+       "table"
+      ],
+      "R2": null,
+      "R3": null
+     },
+     "step": 4
+    },
+    {
+     "actions": {
+      "R1": [
+       "Place",
+       "table"
+      ],
+      "R2": null,
+      "R3": null
+     },
+     "step": 5
+    }
+   ]
+  },
+  "style": "rule"
+ }
+}

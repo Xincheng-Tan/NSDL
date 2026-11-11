@@ -1,0 +1,67 @@
+# v3.4.1（A0i：契约 {detect,schedule}）——逐字节复制 v3_4 config，只换三键（data.dir/output_dir/run_name）
+# Qwen2.5-VL-7B L-NSDL agentic SFT -- v3.4 contract main row (plan.md A0g/A0h).
+# v3.4 = v3.3 recipe with ONLY the data swapped to the v3.4 corpus:
+#   {detect, schedule, expand} 3-tool system prompt (LNSDL_TOOLSET_CONTRACT=v34
+#   baked into the corpus rows; the trainer itself needs no env),
+#   schedule demo on every row (schedule-policy always),
+#   zero verify_goal_coverage demos (goal-coverage-policy direct).
+# Optimisation is byte-identical to v3.3: 4 ranks x batch 1 x accum 2 ==
+# effective batch 8 (same as v3.3's 2 x 1 x 4); lr/schedule/loss weights
+# unchanged, so this checkpoint is comparable to the v3.3 main row up to the
+# corpus contract. VIKI seq mean 4,461 never OOM'd at 2 ranks -- 4 ranks is
+# comfortably inside budget (the LOCUS 4-gpu note's fp32-logits tail spike
+# does not bind here).
+
+model:
+  path: checkpoints/Qwen2.5-VL-7B-Instruct
+  flash_attn: true
+  freeze_vision_tower: true
+  freeze_multi_modal_projector: true
+  freeze_language_model: false
+
+data:
+  dir: data/lnsdl/sft/v3_4_1/gpt56_terra_image_p513_obsbranch_v341_full
+  prompt_variant: lnsdl_agentic_lean
+  max_seq_len: 8192
+  internal_val_ratio: 0.05
+  internal_val_stratify: ["task_name"]
+  internal_val_seed: 4242
+
+training:
+  output_dir: checkpoints/lnsdl/sft/v3_4_1/qwen25-vl-7b-gpt56-terra-v341-seed1234-Bctrl
+  num_train_epochs: 2
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  # 4 ranks x 1 x accum 2 == effective batch 8 (v3.3 parity).
+  gradient_accumulation_steps: 2
+  learning_rate: 5.0e-6
+  goal_loss_weight: 3.0
+  plan_loss_weight: 1.0
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+  weight_decay: 0.0
+  gradient_checkpointing: false
+  logging_steps: 10
+  save_strategy: steps
+  save_steps: 500
+  eval_strategy: steps
+  eval_steps: 500
+  metric_for_best_model: eval_loss
+  greater_is_better: false
+  load_best_model_at_end: false
+  early_stopping_patience: 2
+  save_total_limit: 3
+  save_only_model: true
+  dataloader_num_workers: 0
+  report_to: wandb
+  wandb_project: LNSDL-Agentic-SFT
+  run_name: lnsdl-agentic-vl-sft-7b-ctrl-terra-v3.4.1-seed1234-4gpu
+  optim: adafactor
+  seed: 1234
+  fsdp: ["full_shard", "auto_wrap"]
+  fsdp_config:
+    transformer_layer_cls_to_wrap: Qwen2_5_VLDecoderLayer
+    activation_checkpointing: true
+    use_orig_params: true
+  ddp_find_unused_parameters: false
+  torch_empty_cache_steps: 50

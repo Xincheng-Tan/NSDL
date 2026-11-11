@@ -1,0 +1,127 @@
+# ⚑ v3.4 契约格 · 7B LOCUS 主行（2026-09-01 建，M 机 4 卡）。
+#
+# 本 config 由 `…-v3_3-locus-schedall-cap524288-seed42-4gpu.yaml` **逐字节复制**，
+# v3.4.1（A0i）：逐字节复制 v3_4-locus config，只换三键（data.dir / output_dir / run_name），其余训练超参一个都没动
+# ⇒ 与该基线的差 = 纯语料契约差（v3.3-schedall -> v3.4）。
+#
+# 语料 = data/lnsdl/sft/v3_4_1_locus/gpt56_terra_locus_train_v341_schedall
+# （模型可见工具 5->3：去 verify / verify_goal_coverage；schedule 全行演示）。
+# 与副机 B 的 8B 同格（`…-qwen3-8b-v3_4-locus-cap524288-seed42.yaml`）**同语料同配方**
+# ⇒ 两条主行构成 v3.4 契约下的跨骨干对照。已知不平价仅 optimizer 一项
+# （7B adafactor / 8B AdamW，两骨干本来就各用各的，见 8B config 表注）。
+#
+# 队列位置：plan.md 旧「序 14（schedall 双 seed 重训）」已并入本格；本 ckpt 即
+# 序 16（LOCUS-RL）前置① 要求的「新契约主行 ckpt 作 init」。
+#
+# ⚠ eval 侧必须 `export LNSDL_TOOLSET_CONTRACT=v34`，否则 prompt 给 5 工具而权重按
+#   3 工具训过 —— 这种失配不报错，只会读成「能力下降」。
+# ⚠ 读表纪律：v3.4 桶不与 v3.3 桶并列进同表，只作契约对照列。
+# ⚠ 分辨率 cap 由发射器 export LNSDL_IMAGE_MAX_PIXELS=524288，故意不是 yaml 键
+#   （SFT / eval / RL rollout 三处必须逐字相同）。
+#
+# ---------------- 以下为基线 config 原注释 ----------------
+# Qwen2.5-VL-7B L-NSDL agentic SFT on LOCUS-Bench train, at a CAPPED input
+# resolution (A0b G1, seed 42, 2026-08-27).
+#
+# LNSDL_IMAGE_MAX_PIXELS=524288 must be exported by the launcher. The cap is not a
+# yaml key on purpose: it has to hold identically in SFT, eval and RL rollout, and
+# an env var read by one shared helper (nsdl/image_pixel_cap.py) is the only form
+# that can. run_vl_sft.py applies it to the processor before tokenisation and
+# verifies it persisted into the saved preprocessor_config.json, so evaluating this
+# checkpoint is resolution-matched by construction even with the env var unset.
+#
+# WHY CAPPED. LOCUS renders 1920x1080 and Qwen2.5-VL's max_pixels (12,845,056)
+# downscales nothing => 2,691 vision tokens/sample vs VIKI-L2's 252, seq mean 6,246.
+# That is what OOM'd the uncapped run on 2 cards and what puts an RL prompt (5,854
+# tok) past verl's max_prompt_length=4096. At 524,288 the render becomes 646 tokens
+# (smart_resize FLOORS on the way down, so ~952x532 -- do not compute this from
+# "rendered at 960x540"), seq mean ~4,200, i.e. back inside VIKI's envelope.
+#
+# EVIDENCE, AND ITS LIMIT (chain i, 2026-08-26/27). Paired McNemar, 560 LOCUS
+# samples, temperature 0.0, two ckpt families to separate the train/eval mismatch
+# term: transfer@524288 p=.121, transfer@921600 p=.511, mainrow@524288 p=.071 --
+# all three PASS under the pre-registered rule. But all three point estimates are
+# NEGATIVE (-1.79 / -0.89 / -1.96 pt) and 34 discordant pairs give ~30% power
+# against a 2 pt effect. The honest reading is "no detectable cost within +-3.7 pt",
+# not "no cost". If a paper claim ever rests on this, say the interval.
+#
+# WORLD SIZE: 4, NOT 2 (retry after the 2-rank run OOM'd, 2026-08-27 04:29).
+# The 2-rank sibling of this file predicted "cap restores the 2-rank world size"
+# from the SEQUENCE MEAN (~4,200 vs VIKI's 4,461). It died at step 747/1494 with
+# `Tried to allocate 2.59 GiB` inside the fp32 cross_entropy at
+# scripts/run_vl_sft.py:610, rank0 already holding 74.75 GiB of 79.14. The mean
+# was the wrong statistic: 2.59 GiB == 4,787 tok x 152,064 x 4 B, i.e. a TAIL
+# sample. The cap did not create headroom, it moved the failure from step 1 to
+# step 747.
+#
+# Why 4 ranks fixes it, and why that is not obvious. Going wider does NOT shrink
+# the logits tensor -- that is per-sample (batch 1) and identical on every rank.
+# What it shrinks is everything FSDP shards: params/grads/optimiser go from 1/2
+# to 1/4 each, freeing ~8-10 GiB per card for the activation spike to live in.
+# The run needed ~2 GiB more than it had.
+#
+# accum 4 -> 2 keeps the effective batch at 8 (4 x 1 x 2 == 2 x 1 x 4), so the
+# optimisation is unchanged and this checkpoint stays comparable to every other
+# v3.3 recipe. NOTE the interaction with memory note
+# `locus-sft-source-and-phi-defects-2026-08-25` ("7B must be pinned to 2 cards or
+# the batch becomes 16"): that holds only if accum is left alone. It is not.
+#
+# Second belt: the launcher exports PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True.
+# 2.78 GiB of the dead run was "reserved but unallocated" -- fragmentation alone
+# was ~= the missing allocation. It is a belt, not the fix; do not attribute.
+
+model:
+  path: checkpoints/Qwen2.5-VL-7B-Instruct
+  flash_attn: true
+  freeze_vision_tower: true
+  freeze_multi_modal_projector: true
+  freeze_language_model: false
+
+data:
+  dir: data/lnsdl/sft/v3_4_1_locus/gpt56_terra_locus_train_v341_schedall_phioff
+  prompt_variant: lnsdl_agentic_lean
+  max_seq_len: 8192
+  internal_val_ratio: 0.05
+  internal_val_stratify: ["task_name"]
+  internal_val_seed: 4242
+
+training:
+  output_dir: checkpoints/lnsdl/sft/v3_4_1_locus/qwen25-vl-7b-locus-phioff-v341-cap524288-seed42
+  num_train_epochs: 2
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  # 4 ranks x 1 x accum 2 == effective batch 8, same as every other v3.3 recipe.
+  # The fp32 logits upcast at modeling_qwen2_5_vl.py:1844 (seq x 152,064 x 4 B)
+  # is NOT covered by activation checkpointing and is what OOM'd at 2 ranks.
+  gradient_accumulation_steps: 2
+  learning_rate: 5.0e-6
+  goal_loss_weight: 3.0
+  plan_loss_weight: 1.0
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+  weight_decay: 0.0
+  gradient_checkpointing: false
+  logging_steps: 10
+  save_strategy: steps
+  save_steps: 500
+  eval_strategy: steps
+  eval_steps: 500
+  metric_for_best_model: eval_loss
+  greater_is_better: false
+  load_best_model_at_end: false
+  early_stopping_patience: 2
+  save_total_limit: 3
+  save_only_model: true
+  dataloader_num_workers: 0
+  report_to: wandb
+  wandb_project: LNSDL-Agentic-SFT
+  run_name: lnsdl-agentic-vl-sft-7b-locus-phioff-v341-train-v3.4.1-cap524288-seed42-4gpu
+  seed: 42
+  optim: adafactor
+  fsdp: ["full_shard", "auto_wrap"]
+  fsdp_config:
+    transformer_layer_cls_to_wrap: Qwen2_5_VLDecoderLayer
+    activation_checkpointing: true
+    use_orig_params: true
+  ddp_find_unused_parameters: false
+  torch_empty_cache_steps: 50

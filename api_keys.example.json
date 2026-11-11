@@ -1,0 +1,6 @@
+{
+  "_comment": "Copy to api_keys.json (git-ignored). Only needed to construct SFT traces with a teacher model or to run the closed-source baseline; NSDL training and evaluation do not read it.",
+  "OPENAI_KEY": ["sk-..."],
+  "RELAY_A": {"base_url": "https://api.openai.com", "openai_base_url": "https://api.openai.com/v1", "OPENAI_KEY": "sk-...", "CLAUDE_KEY": ""},
+  "RELAY_A2": {"base_url": "https://api.openai.com", "openai_base_url": "https://api.openai.com/v1", "OPENAI_KEY": "sk-...", "CLAUDE_KEY": ""}
+}

@@ -1,0 +1,98 @@
+# ⚑ v3.4 契约格（2026-09-01 建）：本 config 由 v3.3-schedall seed42 config **逐字节复制**，
+#   只改三处（data.dir / output_dir / run_name），其余训练超参一个都没动 ⇒ 与
+#   `…-v3_3-locus-schedall-cap524288-seed42.yaml` 的差 = 纯语料契约差。
+#
+#   语料 = data/lnsdl/sft/v3_4_1_locus/gpt56_terra_locus_train_v341_schedall（6300 行，
+#   plan.md A0g 契约：模型可见工具 5→3（去 verify / verify_goal_coverage）、schedule
+#   全行演示）。audit：goal_coverage not_used=6300、schedule action_set_match=6300。
+#
+#   ⚠ eval 侧必须 `export LNSDL_TOOLSET_CONTRACT=v34`，否则 prompt 给 5 工具而权重
+#      按 3 工具训过 —— 这种失配不会报错，只会读成"能力下降"。
+#   ⚠ 读表纪律：v3.4 桶与 v3.3-schedall 桶**不并列进同表**（语料契约不同），
+#      只作契约对照列；两者同机同 ckpt 配方，故差值可归给契约。
+#
+# G9×G1 交叉格：Qwen3-VL-8B 的 **LOCUS 主行**（副机 B，4×A800 FSDP，seed 42，2026-08-30）。
+#
+# 为什么建这一格。G9 目前只证明了「v3.3 配方在第二骨干上可训、且 VIKI→LOCUS 的
+# **transfer 行**跨骨干成立」。而论文的主结果行是 G1 定义的 **foundation + LOCUS train**。
+# 只有 transfer 行的跨骨干证据，审稿人可以合理地问：「换骨干重训主行还成立吗？」
+# 本格给出 7B 主行 @cap524288 的同口径 8B 对照。
+#
+# 与 8B VIKI 正式格（configs/lnsdl-agentic-vl-sft-qwen3-8b-v3_3-seed42.yaml，
+# 在 hub 分支 exp/b-g9 上）**只差三处**，逐条都是"换数据集"必然带来的：
+#   data.dir            v3_3 VIKI 全量 -> v3_3_locus 全量
+#   training.output_dir 换目录（不覆盖 G9 的 ckpt）
+#   run_name/注释
+# lr 5.0e-6 / accum 2 / 有效 batch 8 / 损失权重 / scheduler / warmup / freeze 三项 /
+# max_seq_len / FSDP wrap / save 簿记 —— **一个都没动**。8B 的显存包络（峰值 69.8/80 GiB）
+# 就是在这套配方下量出来的。
+#
+# ⚠ 与 7B LOCUS 主行的**已知不平价一项**：optimizer。
+#   7B 各格用 `optim: adafactor`，8B（与 2B）用默认 AdamW。这**不是**本格引入的差异——
+#   两个骨干在 VIKI 格上本来就各用各的（7B v3_3 = adafactor、8B/2B = AdamW），
+#   两条主行只是各自沿用。改成 adafactor 会让 8B 的显存包络失效（那是 AdamW 下量的），
+#   在无人值守的过夜 run 里换一个从未在 8B 上试过的 optimizer 是更大的风险。
+#   ⇒ 跨骨干只比**方向与显著性**，不比绝对值。这条要写进表注。
+#
+# ⚠ 分辨率：LNSDL_IMAGE_MAX_PIXELS=524288 由发射器 export，**故意不是 yaml 键**——
+#   同一个 cap 必须在 SFT / eval / RL rollout 三处逐字相同，只有 env + 单一 helper
+#   （nsdl/image_pixel_cap.py）这一种形式能做到。run_vl_sft.py 会把它写进保存的
+#   preprocessor_config.json 并校验，故本 ckpt 的 eval **按构造**就是分辨率匹配的。
+#   与 7B 主行同 cap ⇒ 两条主行的输入 token 预算同口径。
+#
+# ⚠ 数据里内嵌的是主机绝对 image_path，B 侧必须 export NSDL_PATH_REMAP。
+#   本格的 6297 张 train 图 2026-08-30 从 M 全量重传（先删半截目录再传 + 尺寸清单校验），
+#   不复用此前那份 1492/6300 的 `_PARTIAL_DO_NOT_USE` 残留。
+#
+# 规模：6297 行 × 95% ≈ 5982 训练行 / 有效 batch 8 ≈ 748 步/epoch，2 epoch ≈ 1496 步。
+
+model:
+  path: checkpoints/base/Qwen3-VL-8B-Instruct
+  flash_attn: true
+  freeze_vision_tower: true
+  freeze_multi_modal_projector: true
+  freeze_language_model: false
+
+data:
+  dir: data/lnsdl/sft/v3_4_1_locus/gpt56_terra_locus_train_v341_schedall
+  prompt_variant: lnsdl_agentic_lean
+  max_seq_len: 8192
+  internal_val_ratio: 0.05
+  internal_val_stratify: ["task_name"]
+  internal_val_seed: 4242
+
+training:
+  output_dir: checkpoints/lnsdl/sft/v3_4_1_locus/qwen3-vl-8b-locus-v341-cap524288-seed42
+  num_train_epochs: 2
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 2
+  learning_rate: 5.0e-6
+  goal_loss_weight: 3.0
+  plan_loss_weight: 1.0
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+  weight_decay: 0.0
+  gradient_checkpointing: false
+  logging_steps: 10
+  save_strategy: steps
+  save_steps: 500
+  eval_strategy: steps
+  eval_steps: 500
+  metric_for_best_model: eval_loss
+  greater_is_better: false
+  load_best_model_at_end: false
+  early_stopping_patience: 2
+  save_total_limit: 3
+  save_only_model: true
+  dataloader_num_workers: 0
+  report_to: none
+  run_name: lnsdl-agentic-vl-sft-qwen3-8b-locus-v341-train-v3.4.1-cap524288-seed42
+  seed: 42
+  fsdp: ["full_shard", "auto_wrap"]
+  fsdp_config:
+    transformer_layer_cls_to_wrap: Qwen3VLTextDecoderLayer
+    activation_checkpointing: true
+    use_orig_params: true
+  ddp_find_unused_parameters: false
+  torch_empty_cache_steps: 50

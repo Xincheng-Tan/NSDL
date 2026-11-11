@@ -1,0 +1,513 @@
+{
+ "ground_truth": {
+  "description": "Make sure the meat and the wine both end up on the kitchen work area.",
+  "goal_constraints": [
+   [
+    {
+     "is_satisfied": true,
+     "name": "meat",
+     "status": {
+      "is_activated": null,
+      "pos.name": "kitchen work area"
+     },
+     "type": "asset"
+    }
+   ],
+   [
+    {
+     "is_satisfied": true,
+     "name": "wine",
+     "status": {
+      "is_activated": null,
+      "pos.name": "kitchen work area"
+     },
+     "type": "asset"
+    }
+   ]
+  ],
+  "idle_robots": [],
+  "init_pos": {
+   "R1": null,
+   "R2": null,
+   "apple_0": null,
+   "apple_1": null,
+   "banana_0": null,
+   "banana_1": null,
+   "banana_2": null,
+   "bottle_0": null,
+   "bottle_1": null,
+   "bottle_2": null,
+   "bowl_0": null,
+   "bowl_2": null,
+   "bread_0": null,
+   "bread_1": null,
+   "cabinet_0": null,
+   "cardboardbox_1": null,
+   "clothes iron_3": null,
+   "clothes iron_4": null,
+   "clothes iron_5": null,
+   "cup_0": null,
+   "cup_1": null,
+   "cup_2": null,
+   "drawer_0": null,
+   "fork_0": null,
+   "fork_1": null,
+   "fork_2": null,
+   "fridge_0": null,
+   "hammer_2": null,
+   "hammer_3": null,
+   "hammer_4": null,
+   "hammer_5": null,
+   "indoor plant_2": null,
+   "indoor plant_3": null,
+   "indoor plant_4": null,
+   "indoor plant_5": null,
+   "kettle_1": null,
+   "kettle_2": null,
+   "knife_1": null,
+   "meat_0": [
+    "kitchen island area"
+   ],
+   "oven_0": null,
+   "peach_0": null,
+   "peach_1": null,
+   "pear_0": null,
+   "pizza_1": null,
+   "plate_0": null,
+   "plate_1": null,
+   "plate_2": null,
+   "pumpkin_0": null,
+   "pumpkin_1": null,
+   "rock_2": null,
+   "rock_3": null,
+   "rock_4": null,
+   "scissors_1": null,
+   "scissors_2": null,
+   "shoe_2": null,
+   "shoe_3": null,
+   "shoe_4": null,
+   "shoe_5": null,
+   "sink_1": null,
+   "sink_2": null,
+   "spoon_0": null,
+   "spoon_1": null,
+   "spoon_2": null,
+   "toaster_1": null,
+   "tomato_0": null,
+   "towel_2": null,
+   "towel_3": null,
+   "towel_4": null,
+   "wine_1": [
+    "kitchen island area"
+   ]
+  },
+  "layout_id": 4,
+  "locus_meta": {
+   "base_mechanical_signature": {
+    "base_open": false,
+    "m_level": 1,
+    "n_robots": 1,
+    "topology": "serial_fetch"
+   },
+   "bench_family": "F1",
+   "bridge_kind": null,
+   "bridge_variant": null,
+   "cell": [
+    0,
+    1
+   ],
+   "counterfactual_pair_id": null,
+   "device_variant": null,
+   "distractors": [],
+   "empty_plan": false,
+   "fixture_layout_masks": [],
+   "instantiate_seed": 2277305655,
+   "layout_holdout": false,
+   "layout_restricted": false,
+   "mask_map": {
+    "mask1": "meat",
+    "mask2": "wine",
+    "mask3": "kitchen work area",
+    "mask4": null,
+    "mask5": null
+   },
+   "n_paraphrases": 6,
+   "n_realizations": 1,
+   "observation_tool": null,
+   "opaque_container": false,
+   "paraphrase_holdout": true,
+   "paraphrase_id": 4,
+   "phi_code": null,
+   "phi_ok": true,
+   "sample_index": 6,
+   "split": "test_id",
+   "state_entailed_open": false,
+   "state_realization": {
+    "mask1": null,
+    "mask2": null,
+    "mask3": null
+   },
+   "style_idx": 3,
+   "style_seed": 5687710878198436252
+  },
+  "robots": {
+   "R1": "fetch",
+   "R2": null,
+   "R3": null
+  },
+  "task_id": "F1_s0m1",
+  "task_name": "F1_s0m1",
+  "temporal_constraints": [],
+  "time_steps": [
+   {
+    "actions": {
+     "R1": [
+      "Move",
+      "meat"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 1
+   },
+   {
+    "actions": {
+     "R1": [
+      "Reach",
+      "meat"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 2
+   },
+   {
+    "actions": {
+     "R1": [
+      "Grasp",
+      "meat"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 3
+   },
+   {
+    "actions": {
+     "R1": [
+      "Move",
+      "kitchen work area"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 4
+   },
+   {
+    "actions": {
+     "R1": [
+      "Place",
+      "kitchen work area"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 5
+   },
+   {
+    "actions": {
+     "R1": [
+      "Move",
+      "wine"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 6
+   },
+   {
+    "actions": {
+     "R1": [
+      "Reach",
+      "wine"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 7
+   },
+   {
+    "actions": {
+     "R1": [
+      "Grasp",
+      "wine"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 8
+   },
+   {
+    "actions": {
+     "R1": [
+      "Move",
+      "kitchen work area"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 9
+   },
+   {
+    "actions": {
+     "R1": [
+      "Place",
+      "kitchen work area"
+     ],
+     "R2": null,
+     "R3": null
+    },
+    "step": 10
+   }
+  ]
+ },
+ "stored_plan": [
+  {
+   "step": 1,
+   "actions": {
+    "R1": [
+     "Move",
+     "meat"
+    ]
+   }
+  },
+  {
+   "step": 2,
+   "actions": {
+    "R1": [
+     "Reach",
+     "meat"
+    ]
+   }
+  },
+  {
+   "step": 3,
+   "actions": {
+    "R1": [
+     "Grasp",
+     "meat"
+    ]
+   }
+  },
+  {
+   "step": 4,
+   "actions": {
+    "R1": [
+     "Move",
+     "wine"
+    ]
+   }
+  },
+  {
+   "step": 5,
+   "actions": {
+    "R1": [
+     "Reach",
+     "wine"
+    ]
+   }
+  },
+  {
+   "step": 6,
+   "actions": {
+    "R1": [
+     "Grasp",
+     "wine"
+    ]
+   }
+  },
+  {
+   "step": 7,
+   "actions": {
+    "R1": [
+     "Move",
+     "kitchen work area"
+    ]
+   }
+  },
+  {
+   "step": 8,
+   "actions": {
+    "R1": [
+     "Place",
+     "kitchen work area"
+    ]
+   }
+  },
+  {
+   "step": 9,
+   "actions": {
+    "R1": [
+     "Place",
+     "kitchen work area"
+    ]
+   }
+  }
+ ],
+ "forced_phi_reschedule": {
+  "applied": true,
+  "source": "carried_sketch",
+  "outcome": "rescheduled",
+  "schedule_result": {
+   "ok": true,
+   "ops": [
+    {
+     "op_id": "op1",
+     "op_type": "acquire",
+     "entity": "meat",
+     "dest": null,
+     "deps": [],
+     "robot": "R1",
+     "params": {},
+     "gaps": [
+      "deps"
+     ]
+    },
+    {
+     "op_id": "op3",
+     "op_type": "acquire",
+     "entity": "wine",
+     "dest": null,
+     "deps": [],
+     "robot": "R1",
+     "params": {},
+     "gaps": [
+      "deps"
+     ]
+    },
+    {
+     "op_id": "op2",
+     "op_type": "deposit",
+     "entity": "meat",
+     "dest": "kitchen work area",
+     "deps": [
+      "op1"
+     ],
+     "robot": "R1",
+     "params": {},
+     "gaps": [
+      "deps",
+      "precond"
+     ]
+    },
+    {
+     "op_id": "op4",
+     "op_type": "deposit",
+     "entity": "wine",
+     "dest": "kitchen work area",
+     "deps": [
+      "op3"
+     ],
+     "robot": "R1",
+     "params": {},
+     "gaps": [
+      "deps",
+      "precond"
+     ]
+    }
+   ],
+   "schedule": [
+    {
+     "step": 1,
+     "actions": {
+      "R1": [
+       "Move",
+       "meat"
+      ]
+     }
+    },
+    {
+     "step": 2,
+     "actions": {
+      "R1": [
+       "Reach",
+       "meat"
+      ]
+     }
+    },
+    {
+     "step": 3,
+     "actions": {
+      "R1": [
+       "Grasp",
+       "meat"
+      ]
+     }
+    },
+    {
+     "step": 4,
+     "actions": {
+      "R1": [
+       "Move",
+       "kitchen work area"
+      ]
+     }
+    },
+    {
+     "step": 5,
+     "actions": {
+      "R1": [
+       "Place",
+       "kitchen work area"
+      ]
+     }
+    },
+    {
+     "step": 6,
+     "actions": {
+      "R1": [
+       "Move",
+       "wine"
+      ]
+     }
+    },
+    {
+     "step": 7,
+     "actions": {
+      "R1": [
+       "Reach",
+       "wine"
+      ]
+     }
+    },
+    {
+     "step": 8,
+     "actions": {
+      "R1": [
+       "Grasp",
+       "wine"
+      ]
+     }
+    },
+    {
+     "step": 9,
+     "actions": {
+      "R1": [
+       "Move",
+       "kitchen work area"
+      ]
+     }
+    },
+    {
+     "step": 10,
+     "actions": {
+      "R1": [
+       "Place",
+       "kitchen work area"
+      ]
+     }
+    }
+   ]
+  }
+ }
+}

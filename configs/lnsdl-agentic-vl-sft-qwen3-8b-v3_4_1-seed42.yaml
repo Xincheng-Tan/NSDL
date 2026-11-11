@@ -1,0 +1,65 @@
+# ⚑ 队列序 19（plan.md A0m③ 2026-09-04 用户裁决：Qwen3-VL-8B 只做 SFT、不做 RL）——
+#   Qwen3-VL-8B 的 **v3.4.1-VIKI 行**（最终契约 {detect, schedule}），seed 42，B 机 4 卡 FSDP。
+#   = §「📌 待办：Qwen3-VL SFT 补实验」T3/T4 在最终契约上的版本（v3.3 8B VIKI 两 seed 已于 08-29 做完）。
+#
+# 派生规则：由 configs/lnsdl-agentic-vl-sft-qwen3-8b-v3_4_1-locus-cap524288-seed42.yaml
+# 只换三键（data.dir / output_dir / run_name），其余一个都没动 ⇒
+#   - 与 8B v3.4.1-LOCUS 主行同配方（lr 5.0e-6 / 4 x 1 x accum 2 = 有效 batch 8 / AdamW /
+#     Qwen3VLTextDecoderLayer wrap / activation ckpt），显存包络已由该行量过（峰值 69.8/80 GiB）；
+#   - 与 7B v3.4.1-VIKI 主行（M，adafactor）的已知不平价 = optimizer 一项 + 跨栈（NSDL3 vs NSDL）
+#     ⇒ 只报方向与显著性，不比绝对值（同序 5 G9 / 序 11 chain h 的读表纪律）。
+#   - 无 cap：VIKI 图像本就在 max_pixels 之内（7B VIKI 行同样不 cap）。
+# ⚠ FSDP wrap 类必须是 Qwen3VLTextDecoderLayer（写成 Qwen3VLDecoderLayer 不报错但不包 ⇒ 几小时后 OOM）。
+# ⚠ eval 侧必须 export LNSDL_TOOLSET_CONTRACT=v341；A1 硬化（rep 1.05 + stop）按 B 侧 8B 08-30 起的
+#   口径开着（与 7B v3.4.1 主行桶同口径），桶名带 _a1；v3.3 的 8B VIKI 桶是无 A1 口径，不并列。
+
+model:
+  path: checkpoints/base/Qwen3-VL-8B-Instruct
+  flash_attn: true
+  freeze_vision_tower: true
+  freeze_multi_modal_projector: true
+  freeze_language_model: false
+
+data:
+  dir: data/lnsdl/sft/v3_4_1/gpt56_terra_image_p513_obsbranch_v341_full
+  prompt_variant: lnsdl_agentic_lean
+  max_seq_len: 8192
+  internal_val_ratio: 0.05
+  internal_val_stratify: ["task_name"]
+  internal_val_seed: 4242
+
+training:
+  output_dir: checkpoints/lnsdl/sft/v3_4_1/qwen3-vl-8b-gpt56-terra-image-p513-obsbranch-v341-seed42
+  num_train_epochs: 2
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 2
+  learning_rate: 5.0e-6
+  goal_loss_weight: 3.0
+  plan_loss_weight: 1.0
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+  weight_decay: 0.0
+  gradient_checkpointing: false
+  logging_steps: 10
+  save_strategy: steps
+  save_steps: 500
+  eval_strategy: steps
+  eval_steps: 500
+  metric_for_best_model: eval_loss
+  greater_is_better: false
+  load_best_model_at_end: false
+  early_stopping_patience: 2
+  save_total_limit: 3
+  save_only_model: true
+  dataloader_num_workers: 0
+  report_to: none
+  run_name: lnsdl-agentic-vl-sft-qwen3-8b-gpt56-terra-image-p513-obsbranch-v3.4.1-seed42
+  seed: 42
+  fsdp: ["full_shard", "auto_wrap"]
+  fsdp_config:
+    transformer_layer_cls_to_wrap: Qwen3VLTextDecoderLayer
+    activation_checkpointing: true
+    use_orig_params: true
+  ddp_find_unused_parameters: false
+  torch_empty_cache_steps: 50
