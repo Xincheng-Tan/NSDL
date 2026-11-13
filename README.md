@@ -4,7 +4,7 @@ Xincheng Tan<sup>1</sup>, Ke Wang<sup>1</sup>, Yining Di<sup>2</sup>, Minfeng Zh
 
 <sup>1</sup>Zhejiang University &nbsp; <sup>2</sup>The Hong Kong Polytechnic University
 
-Code, model weights and LOCUS-Bench of the paper (arXiv preprint, 2026). Section, table and
+Code, model weights and LOCUS-Bench of the paper ([arXiv:2611.16671](https://arxiv.org/abs/2611.16671)). Section, table and
 figure numbers below refer to the arXiv version. Correspondence to Minfeng Zhu
 (minfeng_zhu@zju.edu.cn); issues are welcome.
 
@@ -129,6 +129,6 @@ licensing is stated on its dataset card.
   title  = {{NSDL}: Neuro-Symbolic Division of Labor for Multi-Robot Task Planning},
   author = {Tan, Xincheng and Wang, Ke and Di, Yining and Zhu, Minfeng},
   year   = {2026},
-  note   = {arXiv preprint}
+  note   = {arXiv:2611.16671}
 }
 ```
